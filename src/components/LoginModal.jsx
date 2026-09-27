@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { LogIn, KeyRound, User, Lock, AlertCircle, Sparkles, Check } from "lucide-react";
+import { LogIn, KeyRound, User, Lock, AlertCircle } from "lucide-react";
 
 export function LoginModal({
   isOpen,
@@ -28,26 +28,20 @@ export function LoginModal({
 
     if (!matchedUser) {
       setError(
-        "Identifiant ou e-mail introuvable. Veuillez vérifier ou sélectionner votre profil ci-dessous."
+        "Identifiant ou adresse e-mail introuvable. Veuillez vérifier vos informations ou contacter l'administrateur du club."
       );
       return;
     }
 
     // Check password if set
     if (matchedUser.password && matchedUser.password !== password) {
-      setError("Mot de passe incorrect. Contactez l'administrateur pour le réinitialiser si besoin.");
+      setError("Mot de passe incorrect. Contactez un administrateur du club pour le réinitialiser si besoin.");
       return;
     }
 
     onLogin(matchedUser);
     setPassword("");
     setIdentifier("");
-    setError(null);
-  };
-
-  const handleSelectQuickPlayer = (user) => {
-    setIdentifier(user.username || user.email);
-    setPassword(user.password || "Squash2026!");
     setError(null);
   };
 
@@ -64,7 +58,7 @@ export function LoginModal({
             <div>
               <h2 className="modal-title">Espace Squash Club</h2>
               <p className="modal-subtitle">
-                Identifiez-vous pour indiquer vos disponibilités et voir vos matchs
+                Identifiez-vous pour accéder au planning et indiquer vos disponibilités
               </p>
             </div>
           </div>
@@ -79,44 +73,18 @@ export function LoginModal({
             </div>
           )}
 
-          {/* Quick Select for convenience */}
-          <div className="quick-player-picker">
-            <span className="quick-label">⚡ Accès rapide / Choisissez votre profil :</span>
-            <div className="quick-players-list">
-              {users.map((u) => (
-                <button
-                  type="button"
-                  key={u.id}
-                  className={`quick-player-chip ${
-                    identifier === u.username || identifier === u.email ? "selected" : ""
-                  }`}
-                  onClick={() => handleSelectQuickPlayer(u)}
-                >
-                  <span
-                    className="chip-dot"
-                    style={{ backgroundColor: u.avatarColor || "#10b981" }}
-                  ></span>
-                  <span>{u.displayName}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="login-divider">
-            <span>ou saisissez vos coordonnées</span>
-          </div>
-
           <div className="form-group">
             <label className="form-label">
               <User size={15} />
-              <span>Identifiant ou E-mail</span>
+              <span>Identifiant ou Adresse E-mail</span>
             </label>
             <input
               type="text"
-              placeholder="ex: alexandre ou alexandre.durand@squashclub.fr"
+              placeholder="ex: eric, nicholas ou votre@email.fr"
               value={identifier}
               onChange={(e) => setIdentifier(e.target.value)}
               required
+              autoFocus
             />
           </div>
 
@@ -127,7 +95,7 @@ export function LoginModal({
             </label>
             <input
               type="password"
-              placeholder="••••••••"
+              placeholder="••••••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -142,8 +110,7 @@ export function LoginModal({
           <div className="login-footer-hint">
             <KeyRound size={15} />
             <span>
-              Première connexion ou mot de passe oublié ? Votre responsable de club peut le
-              réinitialiser instantanément.
+              Première connexion ou mot de passe oublié ? Un administrateur peut réinitialiser votre mot de passe depuis l'Espace Admin.
             </span>
           </div>
         </form>
@@ -151,3 +118,4 @@ export function LoginModal({
     </div>
   );
 }
+

@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { X, Shield, Clock, Calendar, Users, Save, Plus, Trash2, KeyRound, Check, Pencil } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { X, Shield, Clock, Calendar, Users, Save, Plus, Trash2, KeyRound, Check, Pencil, Copy } from "lucide-react";
 
 export function AdminModal({
   isOpen,
@@ -17,6 +17,39 @@ export function AdminModal({
   const [userList, setUserList] = useState([...users]);
   const [notification, setNotification] = useState(null);
   const [editingPlayer, setEditingPlayer] = useState(null);
+  const [resetPasswordModalData, setResetPasswordModalData] = useState(null);
+
+  useEffect(() => {
+    setUserList([...users]);
+  }, [users]);
+
+  // Strong password generator (14 characters with upper, lower, digits, and symbols)
+  const generateStrongPassword = (length = 14) => {
+    const upper = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+    const lower = "abcdefghjkmnpqrstuvwxyz";
+    const numbers = "23456789";
+    const special = "!@#$%^&*?";
+
+    const pwd = [
+      upper[Math.floor(Math.random() * upper.length)],
+      upper[Math.floor(Math.random() * upper.length)],
+      lower[Math.floor(Math.random() * lower.length)],
+      lower[Math.floor(Math.random() * lower.length)],
+      numbers[Math.floor(Math.random() * numbers.length)],
+      numbers[Math.floor(Math.random() * numbers.length)],
+      special[Math.floor(Math.random() * special.length)],
+      special[Math.floor(Math.random() * special.length)]
+    ];
+    const all = upper + lower + numbers + special;
+    for (let i = pwd.length; i < length; i++) {
+      pwd.push(all[Math.floor(Math.random() * all.length)]);
+    }
+    for (let i = pwd.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pwd[i], pwd[j]] = [pwd[j], pwd[i]];
+    }
+    return pwd.join("");
+  };
 
   // New holiday form state
   const [holidayName, setHolidayName] = useState("");
@@ -89,19 +122,29 @@ export function AdminModal({
   };
 
   const handleResetPassword = (player) => {
-    showNotification(t.admin_pwd_reset_success.replace("{name}", player.displayName));
+    const newPassword = generateStrongPassword(14);
+    const updated = userList.map((u) => (u.id === player.id ? { ...u, password: newPassword } : u));
+    setUserList(updated);
+    onUpdateUsers(updated);
+    setResetPasswordModalData({
+      player,
+      newPassword,
+      copied: false,
+      isNewPlayer: false
+    });
   };
 
   const handleAddPlayer = (e) => {
     e.preventDefault();
     if (!newPlayerName || !newPlayerUsername) return;
 
+    const strongInitialPassword = generateStrongPassword(14);
     const newPlayer = {
       id: `usr_${Date.now()}`,
       username: newPlayerUsername.toLowerCase(),
       displayName: newPlayerName,
-      email: newPlayerEmail || `${newPlayerUsername.toLowerCase()}@squashclub.fr`,
-      password: "Squash2026!",
+      email: newPlayerEmail || `${newPlayerUsername.toLowerCase()}@grandbesancon.fr`,
+      password: strongInitialPassword,
       role: newPlayerRole,
       skillLevel: newPlayerLevel,
       phone: newPlayerPhone,
@@ -117,7 +160,12 @@ export function AdminModal({
     setNewPlayerUsername("");
     setNewPlayerEmail("");
     setNewPlayerPhone("");
-    showNotification(`Joueur ${newPlayerName} créé avec succès !`);
+    setResetPasswordModalData({
+      player: newPlayer,
+      newPassword: strongInitialPassword,
+      copied: false,
+      isNewPlayer: true
+    });
   };
 
   const handleDeletePlayer = (playerId) => {
@@ -667,6 +715,95 @@ export function AdminModal({
           </button>
         </div>
       </div>
+
+      {/* Persistent Password Reset / Generated Modal */}
+      {resetPasswordModalData && (
+        <div
+          className="modal-overlay reset-pwd-overlay"
+          onClick={() => setResetPasswordModalData(null)}
+        >
+          <div
+            className="modal-container reset-pwd-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-header reset-pwd-header">
+              <div className="modal-title-group">
+                <div className="reset-pwd-badge">
+                  <KeyRound size={22} />
+                </div>
+                <div>
+                  <h3 className="modal-title">
+                    {resetPasswordModalData.isNewPlayer
+                      ? "Nouveau compte créé"
+                      : "Mot de passe réinitialisé"}
+                  </h3>
+                  <p className="modal-subtitle">
+                    Pour {resetPasswordModalData.player.displayName} ({resetPasswordModalData.player.email})
+                  </p>
+                </div>
+              </div>
+              <button
+                className="btn-close"
+                onClick={() => setResetPasswordModalData(null)}
+                title="Fermer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="modal-body reset-pwd-body">
+              <p className="reset-pwd-desc">
+                Le mot de passe sécurisé a été mis à jour dans la base avec succès. Veuillez copier et communiquer ce mot de passe à <strong>{resetPasswordModalData.player.displayName}</strong> :
+              </p>
+
+              <div className="reset-pwd-display-box">
+                <code className="reset-pwd-code">{resetPasswordModalData.newPassword}</code>
+                <button
+                  type="button"
+                  className={`btn-copy-pwd ${resetPasswordModalData.copied ? "copied" : ""}`}
+                  onClick={() => {
+                    navigator.clipboard.writeText(resetPasswordModalData.newPassword);
+                    setResetPasswordModalData((prev) => ({ ...prev, copied: true }));
+                    setTimeout(() => {
+                      setResetPasswordModalData((prev) => (prev ? { ...prev, copied: false } : null));
+                    }, 3000);
+                  }}
+                  title="Copier dans le presse-papier"
+                >
+                  {resetPasswordModalData.copied ? (
+                    <>
+                      <Check size={16} />
+                      <span>Copié !</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy size={16} />
+                      <span>Copier</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              <div className="reset-pwd-instructions">
+                <span>
+                  💡 <strong>Information :</strong> Ce mot de passe est enregistré dans la base et cette fenêtre restera affichée tant que vous ne cliquerez pas sur le bouton ci-dessous. Vous pouvez le copier et l'envoyer par WhatsApp ou par e-mail.
+                </span>
+              </div>
+            </div>
+
+            <div className="modal-footer reset-pwd-footer">
+              <button
+                type="button"
+                className="btn-primary btn-close-pwd-modal"
+                onClick={() => setResetPasswordModalData(null)}
+              >
+                <Check size={16} />
+                <span>J'ai bien noté le mot de passe (Fermer)</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

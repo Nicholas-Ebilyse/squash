@@ -55,11 +55,26 @@ export function App() {
     if (!saved) return INITIAL_USERS;
     try {
       const parsed = JSON.parse(saved);
+      if (
+        !Array.isArray(parsed) ||
+        parsed.some(
+          (u) =>
+            u.id.startsWith("usr_alex") ||
+            u.id.startsWith("usr_marc") ||
+            u.id.startsWith("usr_julien") ||
+            u.id.startsWith("usr_sophie") ||
+            u.id === "usr_admin" ||
+            u.email?.includes("@squashclub.fr")
+        )
+      ) {
+        localStorage.setItem("squash_users", JSON.stringify(INITIAL_USERS));
+        return INITIAL_USERS;
+      }
       return parsed.map((u) => {
         const initial = INITIAL_USERS.find((init) => init.id === u.id);
         return {
           ...u,
-          email: u.email || initial?.email || `${u.username}@squashclub.fr`,
+          email: u.email || initial?.email || "",
           password: u.password || initial?.password || "Squash2026!"
         };
       });

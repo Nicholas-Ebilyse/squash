@@ -33,7 +33,17 @@ export function subscribeUsers(onUpdate) {
           const saved = localStorage.getItem("squash_users");
           if (saved) {
             const parsed = JSON.parse(saved);
-            if (Array.isArray(parsed) && parsed.length > 0) {
+            if (
+              Array.isArray(parsed) &&
+              parsed.length > 0 &&
+              !parsed.some(
+                (u) =>
+                  u.id.startsWith("usr_alex") ||
+                  u.id.startsWith("usr_marc") ||
+                  u.id.startsWith("usr_julien") ||
+                  u.email?.includes("@squashclub.fr")
+              )
+            ) {
               usersToSeed = parsed;
             }
           }
@@ -51,7 +61,16 @@ export function subscribeUsers(onUpdate) {
           id: docSnap.id,
           ...docSnap.data()
         }));
-        onUpdate(usersList);
+        // Filter out any obsolete test docs if they exist
+        const validUsers = usersList.filter(
+          (u) =>
+            !u.id.startsWith("usr_alex") &&
+            !u.id.startsWith("usr_marc") &&
+            !u.id.startsWith("usr_julien") &&
+            !u.id.startsWith("usr_sophie") &&
+            u.id !== "usr_admin"
+        );
+        onUpdate(validUsers.length > 0 ? validUsers : usersList);
       }
     },
     (err) => {
