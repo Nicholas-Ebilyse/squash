@@ -42,7 +42,20 @@ export function App() {
   // 3. Users state
   const [users, setUsers] = useState(() => {
     const saved = localStorage.getItem("squash_users");
-    return saved ? JSON.parse(saved) : INITIAL_USERS;
+    if (!saved) return INITIAL_USERS;
+    try {
+      const parsed = JSON.parse(saved);
+      return parsed.map((u) => {
+        const initial = INITIAL_USERS.find((init) => init.id === u.id);
+        return {
+          ...u,
+          email: u.email || initial?.email || `${u.username}@squashclub.fr`,
+          password: u.password || initial?.password || "Squash2026!"
+        };
+      });
+    } catch (e) {
+      return INITIAL_USERS;
+    }
   });
 
   const handleUpdateUsers = (newUsers) => {

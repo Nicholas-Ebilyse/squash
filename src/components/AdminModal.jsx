@@ -26,6 +26,7 @@ export function AdminModal({
   // New player form state
   const [newPlayerName, setNewPlayerName] = useState("");
   const [newPlayerUsername, setNewPlayerUsername] = useState("");
+  const [newPlayerEmail, setNewPlayerEmail] = useState("");
   const [newPlayerRole, setNewPlayerRole] = useState("player");
   const [newPlayerLevel, setNewPlayerLevel] = useState("intermediaire");
   const [newPlayerPhone, setNewPlayerPhone] = useState("");
@@ -99,6 +100,8 @@ export function AdminModal({
       id: `usr_${Date.now()}`,
       username: newPlayerUsername.toLowerCase(),
       displayName: newPlayerName,
+      email: newPlayerEmail || `${newPlayerUsername.toLowerCase()}@squashclub.fr`,
+      password: "Squash2026!",
       role: newPlayerRole,
       skillLevel: newPlayerLevel,
       phone: newPlayerPhone,
@@ -112,6 +115,7 @@ export function AdminModal({
 
     setNewPlayerName("");
     setNewPlayerUsername("");
+    setNewPlayerEmail("");
     setNewPlayerPhone("");
     showNotification(`Joueur ${newPlayerName} créé avec succès !`);
   };
@@ -434,6 +438,18 @@ export function AdminModal({
                       />
                     </div>
                     <div className="form-group">
+                      <label>{t.form_email}</label>
+                      <input
+                        type="email"
+                        value={editingPlayer.email || ""}
+                        onChange={(e) =>
+                          setEditingPlayer({ ...editingPlayer, email: e.target.value })
+                        }
+                        placeholder="joueur@squashclub.fr"
+                        required
+                      />
+                    </div>
+                    <div className="form-group">
                       <label>{t.form_role}</label>
                       <select
                         value={editingPlayer.role}
@@ -510,6 +526,15 @@ export function AdminModal({
                     />
                   </div>
                   <div className="form-group">
+                    <label>{t.form_email}</label>
+                    <input
+                      type="email"
+                      placeholder="ex: thomas@squashclub.fr"
+                      value={newPlayerEmail}
+                      onChange={(e) => setNewPlayerEmail(e.target.value)}
+                    />
+                  </div>
+                  <div className="form-group">
                     <label>{t.form_role}</label>
                     <select
                       value={newPlayerRole}
@@ -555,6 +580,7 @@ export function AdminModal({
                     <tr>
                       <th>{t.admin_col_name}</th>
                       <th>{t.admin_col_username}</th>
+                      <th>{t.admin_col_email}</th>
                       <th>{t.admin_col_role}</th>
                       <th>{t.admin_col_level}</th>
                       <th>{t.admin_col_actions}</th>
@@ -581,6 +607,11 @@ export function AdminModal({
                           </div>
                         </td>
                         <td><code>{player.username}</code></td>
+                        <td>
+                          <span className="player-email-cell">
+                            ✉️ {player.email || `${player.username}@squashclub.fr`}
+                          </span>
+                        </td>
                         <td>
                           <span className={`role-badge ${player.role}`}>
                             {player.role === "admin" ? "Admin" : "Joueur"}

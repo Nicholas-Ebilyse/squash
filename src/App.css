@@ -1508,6 +1508,12 @@
   font-weight: 400;
 }
 
+.player-email-cell {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
 .row-is-editing {
   background: rgba(16, 185, 129, 0.08) !important;
 }
