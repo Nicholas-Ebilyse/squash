@@ -88,6 +88,13 @@ export function App() {
     return users.find((u) => u.id === currentUserId) || null;
   }, [users, currentUserId]);
 
+  // Ensure login modal is shown if user is not authenticated or user id is obsolete
+  useEffect(() => {
+    if (!currentUser) {
+      setIsLoginModalOpen(true);
+    }
+  }, [currentUser]);
+
   const handleSwitchUser = (user) => {
     setCurrentUserId(user.id);
     localStorage.setItem("squash_current_user_id", user.id);

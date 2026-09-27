@@ -1,22 +1,14 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Club Configuration: readable by anyone in the group, writable by admin
     match /club_config/{configId} {
-      allow read: if true;
-      allow write: if request.auth != null && request.auth.token.role == 'admin';
+      allow read, write: if true;
     }
-
-    // Users collection: readable by group members
     match /users/{userId} {
-      allow read: if true;
-      allow write: if request.auth != null && (request.auth.uid == userId || request.auth.token.role == 'admin');
+      allow read, write: if true;
     }
-
-    // Slots & Bookings collection: readable and updatable by authenticated group players
     match /slots/{slotId} {
-      allow read: if true;
-      allow write: if true; // Or authenticated players in group
+      allow read, write: if true;
     }
   }
 }

@@ -23,115 +23,62 @@ export const INITIAL_CLUB_CONFIG = {
 
 export const INITIAL_USERS = [
   {
-    id: "usr_alex",
-    username: "alexandre",
-    displayName: "Alexandre D.",
-    email: "alexandre.durand@squashclub.fr",
-    password: "SquashAlex2026!",
-    role: "player",
-    skillLevel: "intermediaire",
-    phone: "+33612345678",
-    avatarColor: "#10b981", // Emerald
-    recurringRules: [
-      {
-        id: "r1",
-        dayOfWeek: 2, // Mardi
-        startTime: "18:00",
-        frequency: "BIWEEKLY_EVEN", // Semaines paires
-        description: "Mardi 18h-19h (Semaines paires)"
-      },
-      {
-        id: "r2",
-        dayOfWeek: 4, // Jeudi
-        startTime: "19:00",
-        frequency: "WEEKLY", // Toutes les semaines
-        description: "Jeudi 19h-20h (Hebdomadaire)"
-      }
-    ]
-  },
-  {
-    id: "usr_marc",
-    username: "marc",
-    displayName: "Marc V.",
-    email: "marc.valentin@squashclub.fr",
-    password: "SquashMarc2026!",
-    role: "player",
-    skillLevel: "loisir",
-    phone: "+33623456789",
-    avatarColor: "#3b82f6", // Blue
-    recurringRules: [
-      {
-        id: "r3",
-        dayOfWeek: 2, // Mardi
-        startTime: "18:00",
-        frequency: "WEEKLY", // Tous les mardis
-        description: "Mardi 18h-19h (Hebdomadaire)"
-      },
-      {
-        id: "r4",
-        dayOfWeek: 0, // Dimanche
-        startTime: "15:00",
-        frequency: "BIWEEKLY_ODD", // Semaines impaires
-        description: "Dimanche 15h-16h (Semaines impaires)"
-      }
-    ]
-  },
-  {
-    id: "usr_julien",
-    username: "julien",
-    displayName: "Julien T.",
-    email: "julien.thomas@squashclub.fr",
-    password: "SquashJulien2026!",
-    role: "player",
-    skillLevel: "confirme",
-    phone: "+33634567890",
-    avatarColor: "#f59e0b", // Amber
-    recurringRules: [
-      {
-        id: "r5",
-        dayOfWeek: 4, // Jeudi
-        startTime: "19:00",
-        frequency: "WEEKLY",
-        description: "Jeudi 19h-20h (Hebdomadaire)"
-      },
-      {
-        id: "r6",
-        dayOfWeek: 2, // Mardi
-        startTime: "20:00",
-        frequency: "WEEKLY",
-        description: "Mardi 20h-21h (Hebdomadaire)"
-      }
-    ]
-  },
-  {
-    id: "usr_sophie",
-    username: "sophie",
-    displayName: "Sophie M.",
-    email: "sophie.martin@squashclub.fr",
-    password: "SquashSophie2026!",
-    role: "player",
-    skillLevel: "intermediaire",
-    phone: "+33645678901",
-    avatarColor: "#ec4899", // Pink
-    recurringRules: [
-      {
-        id: "r7",
-        dayOfWeek: 6, // Samedi
-        startTime: "11:00",
-        frequency: "WEEKLY",
-        description: "Samedi 11h-12h (Hebdomadaire)"
-      }
-    ]
-  },
-  {
-    id: "usr_admin",
-    username: "admin",
-    displayName: "Pierre L. (Responsable Club)",
-    email: "pierre.lefevre@squashclub.fr",
-    password: "SquashAdmin2026!",
+    id: "usr_eric",
+    username: "eric",
+    displayName: "Éric Châtelain",
+    email: "eric.chatelain@grandbesancon.fr",
+    password: "SquashEric2026!",
     role: "admin",
     skillLevel: "confirme",
-    phone: "+33698765432",
+    phone: "+33617416309",
+    avatarColor: "#10b981", // Green
+    recurringRules: []
+  },
+  {
+    id: "usr_stephanie",
+    username: "stephanie",
+    displayName: "Stéphanie Commot",
+    email: "stephaco@hotmail.com",
+    password: "SquashSteph2026!",
+    role: "admin",
+    skillLevel: "confirme",
+    phone: "+33663163215",
+    avatarColor: "#3b82f6", // Blue
+    recurringRules: []
+  },
+  {
+    id: "usr_marlene",
+    username: "marlene",
+    displayName: "Marlène Renaud",
+    email: "renaudmarlene@yahoo.fr",
+    password: "SquashMarlene2026!",
+    role: "player",
+    skillLevel: "confirme",
+    phone: "+33681531329",
+    avatarColor: "#f59e0b", // Amber
+    recurringRules: []
+  },
+  {
+    id: "usr_elodie",
+    username: "elodie",
+    displayName: "Élodie Bory",
+    email: "elodie.bory@orange.fr",
+    password: "SquashElodie2026!",
+    role: "player",
+    skillLevel: "confirme",
+    phone: "+33687154050",
+    avatarColor: "#ec4899", // Pink
+    recurringRules: []
+  },
+  {
+    id: "usr_nicholas",
+    username: "nicholas",
+    displayName: "Nicholas Goodwin",
+    email: "nicholas.p.goodwin@gmail.com",
+    password: "SquashNicholas2026!",
+    role: "admin",
+    skillLevel: "confirme",
+    phone: "+33656665882",
     avatarColor: "#8b5cf6", // Purple
     recurringRules: []
   }
