@@ -5,6 +5,7 @@ import { CalendarView } from "./components/CalendarView";
 import { RoutineModal } from "./components/RoutineModal";
 import { BookingModal } from "./components/BookingModal";
 import { AdminModal } from "./components/AdminModal";
+import { LoginModal } from "./components/LoginModal";
 import { translations } from "./i18n/translations";
 import { INITIAL_CLUB_CONFIG, INITIAL_USERS } from "./data/initialData";
 import {
@@ -13,6 +14,14 @@ import {
   getDaysForMonth,
   checkRoutineMatch
 } from "./utils/dateUtils";
+import {
+  subscribeUsers,
+  saveUserToFirestore,
+  subscribeClubConfig,
+  saveClubConfigToFirestore,
+  subscribeSlots,
+  saveSlotToFirestore
+} from "./services/firestoreService";
 import "./App.css";
 
 export function App() {
@@ -37,6 +46,7 @@ export function App() {
   const handleUpdateClubConfig = (newConfig) => {
     setClubConfig(newConfig);
     localStorage.setItem("squash_club_config", JSON.stringify(newConfig));
+    saveClubConfigToFirestore(newConfig);
   };
 
   // 3. Users state
@@ -61,15 +71,21 @@ export function App() {
   const handleUpdateUsers = (newUsers) => {
     setUsers(newUsers);
     localStorage.setItem("squash_users", JSON.stringify(newUsers));
+    newUsers.forEach((u) => saveUserToFirestore(u));
   };
 
-  // 4. Current logged-in user
+  // 4. Current logged-in user & Authentication state
   const [currentUserId, setCurrentUserId] = useState(() => {
-    return localStorage.getItem("squash_current_user_id") || "usr_alex";
+    return localStorage.getItem("squash_current_user_id") || null;
+  });
+
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(() => {
+    return !localStorage.getItem("squash_current_user_id");
   });
 
   const currentUser = useMemo(() => {
-    return users.find((u) => u.id === currentUserId) || users[0];
+    if (!currentUserId) return null;
+    return users.find((u) => u.id === currentUserId) || null;
   }, [users, currentUserId]);
 
   const handleSwitchUser = (user) => {
@@ -77,11 +93,53 @@ export function App() {
     localStorage.setItem("squash_current_user_id", user.id);
   };
 
+  const handleLogin = (user) => {
+    setCurrentUserId(user.id);
+    localStorage.setItem("squash_current_user_id", user.id);
+    setIsLoginModalOpen(false);
+  };
+
+  const handleLogout = () => {
+    setCurrentUserId(null);
+    localStorage.removeItem("squash_current_user_id");
+    setIsLoginModalOpen(true);
+  };
+
   // 5. Slots State { [slotId]: { availablePlayerIds: [], bookings: [] } }
   const [slotsState, setSlotsState] = useState(() => {
     const saved = localStorage.getItem("squash_slots_state");
     return saved ? JSON.parse(saved) : {};
   });
+
+  // Real-time Firestore subscriptions
+  useEffect(() => {
+    const unsubUsers = subscribeUsers((remoteUsers) => {
+      if (remoteUsers && remoteUsers.length > 0) {
+        setUsers(remoteUsers);
+        localStorage.setItem("squash_users", JSON.stringify(remoteUsers));
+      }
+    });
+
+    const unsubConfig = subscribeClubConfig((remoteConfig) => {
+      if (remoteConfig) {
+        setClubConfig(remoteConfig);
+        localStorage.setItem("squash_club_config", JSON.stringify(remoteConfig));
+      }
+    });
+
+    const unsubSlots = subscribeSlots((remoteSlots) => {
+      if (remoteSlots && Object.keys(remoteSlots).length > 0) {
+        setSlotsState(remoteSlots);
+        localStorage.setItem("squash_slots_state", JSON.stringify(remoteSlots));
+      }
+    });
+
+    return () => {
+      if (unsubUsers) unsubUsers();
+      if (unsubConfig) unsubConfig();
+      if (unsubSlots) unsubSlots();
+    };
+  }, []);
 
   // Project users' recurring rules across the 3-month horizon
   const projectRoutines = (currentUsers, config, currentSlots) => {
@@ -127,6 +185,11 @@ export function App() {
 
   // Handler to toggle player's availability on a specific slot
   const handleToggleAvailability = (slotId) => {
+    if (!currentUser) {
+      setIsLoginModalOpen(true);
+      return;
+    }
+
     setSlotsState((prev) => {
       const currentSlot = prev[slotId] || { availablePlayerIds: [], bookings: [] };
       const isAvailable = currentSlot.availablePlayerIds.includes(currentUser.id);
@@ -135,40 +198,50 @@ export function App() {
         ? currentSlot.availablePlayerIds.filter((id) => id !== currentUser.id)
         : [...currentSlot.availablePlayerIds, currentUser.id];
 
+      const nextSlotState = {
+        ...currentSlot,
+        availablePlayerIds: nextPlayerIds
+      };
+
       const nextState = {
         ...prev,
-        [slotId]: {
-          ...currentSlot,
-          availablePlayerIds: nextPlayerIds
-        }
+        [slotId]: nextSlotState
       };
 
       localStorage.setItem("squash_slots_state", JSON.stringify(nextState));
+      saveSlotToFirestore(slotId, nextSlotState);
       return nextState;
     });
   };
 
   // Handler to confirm a court reservation at the club
   const handleConfirmBooking = (slotId, bookingData) => {
+    if (!currentUser) {
+      setIsLoginModalOpen(true);
+      return;
+    }
+
     setSlotsState((prev) => {
       const currentSlot = prev[slotId] || { availablePlayerIds: [], bookings: [] };
       const currentBookings = currentSlot.bookings || [];
 
-      // Replace or add booking for specified court
       const nextBookings = [
         ...currentBookings.filter((b) => b.court !== bookingData.court),
         bookingData
       ];
 
+      const nextSlotState = {
+        ...currentSlot,
+        bookings: nextBookings
+      };
+
       const nextState = {
         ...prev,
-        [slotId]: {
-          ...currentSlot,
-          bookings: nextBookings
-        }
+        [slotId]: nextSlotState
       };
 
       localStorage.setItem("squash_slots_state", JSON.stringify(nextState));
+      saveSlotToFirestore(slotId, nextSlotState);
       return nextState;
     });
   };
@@ -179,15 +252,18 @@ export function App() {
       const currentSlot = prev[slotId] || { availablePlayerIds: [], bookings: [] };
       const nextBookings = (currentSlot.bookings || []).filter((b) => b.court !== courtNumber);
 
+      const nextSlotState = {
+        ...currentSlot,
+        bookings: nextBookings
+      };
+
       const nextState = {
         ...prev,
-        [slotId]: {
-          ...currentSlot,
-          bookings: nextBookings
-        }
+        [slotId]: nextSlotState
       };
 
       localStorage.setItem("squash_slots_state", JSON.stringify(nextState));
+      saveSlotToFirestore(slotId, nextSlotState);
       return nextState;
     });
   };
@@ -208,9 +284,13 @@ export function App() {
   // Modals state
   const [isRoutineModalOpen, setIsRoutineModalOpen] = useState(false);
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
-  const [bookingModalData, setBookingModalData] = useState(null); // { slot, dateObj, availablePlayers }
+  const [bookingModalData, setBookingModalData] = useState(null);
 
   const handleOpenBooking = (slot, dateObj, availablePlayers) => {
+    if (!currentUser) {
+      setIsLoginModalOpen(true);
+      return;
+    }
     setBookingModalData({ slot, dateObj, availablePlayers });
   };
 
@@ -233,13 +313,13 @@ export function App() {
         matchesCount++;
       }
 
-      if (s.availablePlayerIds?.includes(currentUser.id)) {
+      if (currentUser && s.availablePlayerIds?.includes(currentUser.id)) {
         userAvailableCount++;
       }
     }
 
     return { matchesCount, bookedCount, userAvailableCount };
-  }, [slotsState, currentUser.id, clubConfig]);
+  }, [slotsState, currentUser, clubConfig]);
 
   return (
     <div className="app-layout">
@@ -248,10 +328,15 @@ export function App() {
         currentUser={currentUser}
         users={users}
         onSwitchUser={handleSwitchUser}
+        onLogout={handleLogout}
+        onOpenLogin={() => setIsLoginModalOpen(true)}
         language={language}
         onToggleLanguage={handleToggleLanguage}
         t={t}
-        onOpenRoutine={() => setIsRoutineModalOpen(true)}
+        onOpenRoutine={() => {
+          if (!currentUser) setIsLoginModalOpen(true);
+          else setIsRoutineModalOpen(true);
+        }}
         onOpenAdmin={() => setIsAdminModalOpen(true)}
       />
 
@@ -266,7 +351,7 @@ export function App() {
         <CalendarView
           clubConfig={clubConfig}
           users={users}
-          currentUser={currentUser}
+          currentUser={currentUser || { id: "guest", displayName: "Visiteur", role: "guest" }}
           slotsState={slotsState}
           onToggleAvailability={handleToggleAvailability}
           onOpenBooking={handleOpenBooking}
@@ -275,30 +360,45 @@ export function App() {
         />
       </main>
 
-      {/* Routine Modal (Google Calendar style) */}
-      <RoutineModal
-        isOpen={isRoutineModalOpen}
-        onClose={() => setIsRoutineModalOpen(false)}
-        currentUser={currentUser}
-        onUpdateUserRules={handleUpdateUserRules}
+      {/* Identification / Login Modal (appears if not logged in or disconnect clicked) */}
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => {
+          if (currentUser) setIsLoginModalOpen(false);
+        }}
+        users={users}
+        onLogin={handleLogin}
         t={t}
-        clubConfig={clubConfig}
       />
 
+      {/* Routine Modal (Google Calendar style) */}
+      {currentUser && (
+        <RoutineModal
+          isOpen={isRoutineModalOpen}
+          onClose={() => setIsRoutineModalOpen(false)}
+          currentUser={currentUser}
+          onUpdateUserRules={handleUpdateUserRules}
+          t={t}
+          clubConfig={clubConfig}
+        />
+      )}
+
       {/* Booking Modal (Club reservation declaration) */}
-      <BookingModal
-        isOpen={!!bookingModalData}
-        onClose={() => setBookingModalData(null)}
-        slot={bookingModalData?.slot}
-        dateObj={bookingModalData?.dateObj}
-        availablePlayers={bookingModalData?.availablePlayers || []}
-        allUsers={users}
-        currentUser={currentUser}
-        existingBookings={slotsState[bookingModalData?.slot?.id]?.bookings || []}
-        onConfirmBooking={handleConfirmBooking}
-        t={t}
-        clubConfig={clubConfig}
-      />
+      {currentUser && (
+        <BookingModal
+          isOpen={!!bookingModalData}
+          onClose={() => setBookingModalData(null)}
+          slot={bookingModalData?.slot}
+          dateObj={bookingModalData?.dateObj}
+          availablePlayers={bookingModalData?.availablePlayers || []}
+          allUsers={users}
+          currentUser={currentUser}
+          existingBookings={slotsState[bookingModalData?.slot?.id]?.bookings || []}
+          onConfirmBooking={handleConfirmBooking}
+          t={t}
+          clubConfig={clubConfig}
+        />
+      )}
 
       {/* Admin Panel Modal */}
       <AdminModal

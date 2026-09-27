@@ -1,10 +1,12 @@
 import React from "react";
-import { Users, Globe, Settings, Calendar, Shield, Sparkles } from "lucide-react";
+import { Users, Globe, Settings, Calendar, Shield, Sparkles, LogOut, LogIn } from "lucide-react";
 
 export function Header({
   currentUser,
   users,
   onSwitchUser,
+  onLogout,
+  onOpenLogin,
   language,
   onToggleLanguage,
   t,
@@ -31,53 +33,77 @@ export function Header({
 
         {/* Action Controls */}
         <div className="header-actions">
-          {/* User selector */}
-          <div className="user-profile-badge">
-            <div
-              className="user-avatar"
-              style={{ backgroundColor: currentUser.avatarColor || "#10b981" }}
-            >
-              {currentUser.displayName.charAt(0)}
-            </div>
-            <div className="user-info">
-              <span className="user-label">{t.logged_in_as}</span>
-              <select
-                className="user-select"
-                value={currentUser.id}
-                onChange={(e) => {
-                  const selected = users.find((u) => u.id === e.target.value);
-                  if (selected) onSwitchUser(selected);
-                }}
-                title={t.switch_player}
+          {currentUser ? (
+            <>
+              {/* User selector & Profile badge */}
+              <div className="user-profile-badge">
+                <div
+                  className="user-avatar"
+                  style={{ backgroundColor: currentUser.avatarColor || "#10b981" }}
+                >
+                  {currentUser.displayName.charAt(0)}
+                </div>
+                <div className="user-info">
+                  <span className="user-label">{t.logged_in_as}</span>
+                  <select
+                    className="user-select"
+                    value={currentUser.id}
+                    onChange={(e) => {
+                      const selected = users.find((u) => u.id === e.target.value);
+                      if (selected) onSwitchUser(selected);
+                    }}
+                    title={t.switch_player}
+                  >
+                    {users.map((user) => (
+                      <option key={user.id} value={user.id}>
+                        {user.displayName} ({user.role === "admin" ? "Admin" : t[`level_${user.skillLevel}`] || user.skillLevel})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Disconnect Button */}
+              <button
+                className="btn-action btn-logout"
+                onClick={onLogout}
+                title="Se déconnecter de ce compte"
               >
-                {users.map((user) => (
-                  <option key={user.id} value={user.id}>
-                    {user.displayName} ({user.role === "admin" ? "Admin" : t[`level_${user.skillLevel}`] || user.skillLevel})
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
+                <LogOut size={16} />
+                <span className="hide-on-mobile">Déconnexion</span>
+              </button>
 
-          {/* Routine Button */}
-          <button
-            className="btn-action btn-routine"
-            onClick={onOpenRoutine}
-            title={t.routine_title}
-          >
-            <Calendar size={18} />
-            <span className="hide-on-mobile">{t.my_routine_btn}</span>
-          </button>
+              {/* Routine Button */}
+              <button
+                className="btn-action btn-routine"
+                onClick={onOpenRoutine}
+                title={t.routine_title}
+              >
+                <Calendar size={18} />
+                <span className="hide-on-mobile">{t.my_routine_btn}</span>
+              </button>
 
-          {/* Admin Space */}
-          {currentUser.role === "admin" && (
+              {/* Admin Space */}
+              {currentUser.role === "admin" && (
+                <button
+                  className="btn-action btn-admin"
+                  onClick={onOpenAdmin}
+                  title={t.admin_space}
+                >
+                  <Shield size={18} />
+                  <span className="hide-on-mobile">{t.admin_space}</span>
+                </button>
+              )}
+            </>
+          ) : (
+            /* Log in button if disconnected */
             <button
-              className="btn-action btn-admin"
-              onClick={onOpenAdmin}
-              title={t.admin_space}
+              className="btn-action btn-login-primary"
+              onClick={onOpenLogin}
+              title="Se connecter"
             >
-              <Shield size={18} />
-              <span className="hide-on-mobile">{t.admin_space}</span>
+              <LogIn size={18} />
+              <span>Se connecter</span>
             </button>
           )}
 
