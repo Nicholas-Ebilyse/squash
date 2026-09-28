@@ -18,6 +18,18 @@ export const translations = {
     filter_my_availability: "Mes créneaux",
     filter_booked: "Courts réservés",
     
+    // View Modes & Search
+    view_3days: "3 Jours",
+    view_month: "Mois",
+    view_week: "Semaine",
+    view_day: "Jour",
+    view_planning: "Planning",
+    search_placeholder: "Rechercher joueur, horaire (ex: Eric, 18h)...",
+    today_button_title: "Aujourd'hui - Revenir à ce jour",
+    clear_search: "Effacer la recherche",
+    search_results: "{count} créneau(x) trouvé(s)",
+    no_search_results: "Aucun créneau ne correspond à votre recherche.",
+    
     // Time & Horizon
     month_prev: "Mois précédent",
     month_next: "Mois suivant",
@@ -168,6 +180,18 @@ export const translations = {
     filter_matches_only: "Matches ready (≥ 2 players)",
     filter_my_availability: "My slots",
     filter_booked: "Reserved courts",
+    
+    // View Modes & Search
+    view_3days: "3 Days",
+    view_month: "Month",
+    view_week: "Week",
+    view_day: "Day",
+    view_planning: "Schedule",
+    search_placeholder: "Search player, time (e.g. Eric, 18:00)...",
+    today_button_title: "Today - Return to current day",
+    clear_search: "Clear search",
+    search_results: "{count} slot(s) found",
+    no_search_results: "No slots match your search.",
     
     // Time & Horizon
     month_prev: "Previous month",

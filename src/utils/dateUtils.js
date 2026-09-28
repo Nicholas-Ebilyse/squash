@@ -175,3 +175,38 @@ export function getDaysForMonth(year, monthIndex) {
 
   return days;
 }
+
+// Add or subtract days
+export function addDays(date, days) {
+  const result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
+}
+
+// Compare two dates ignoring time
+export function isSameDay(d1, d2) {
+  if (!d1 || !d2) return false;
+  return (
+    d1.getFullYear() === d2.getFullYear() &&
+    d1.getMonth() === d2.getMonth() &&
+    d1.getDate() === d2.getDate()
+  );
+}
+
+// Get 7 days for the week containing `date` (Monday to Sunday)
+export function getDaysForWeek(date) {
+  const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const day = d.getDay(); // 0 is Sunday, 1 is Monday...
+  const diff = (day === 0 ? -6 : 1) - day;
+  const monday = new Date(d);
+  monday.setDate(d.getDate() + diff);
+
+  const weekDays = [];
+  for (let i = 0; i < 7; i++) {
+    const nextDay = new Date(monday);
+    nextDay.setDate(monday.getDate() + i);
+    weekDays.push(nextDay);
+  }
+  return weekDays;
+}
+
