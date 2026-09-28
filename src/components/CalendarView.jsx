@@ -43,7 +43,7 @@ export function CalendarView({
   const [anchorDate, setAnchorDate] = useState(() => new Date());
 
   // 2. View modes matching screenshot 2: "3days" | "month" | "week" | "day" | "planning"
-  const [viewMode, setViewMode] = useState("week"); // Default: Semaine
+  const [viewMode, setViewMode] = useState("month"); // Default: Mois
 
   // 3. Search query
   const [searchQuery, setSearchQuery] = useState("");
