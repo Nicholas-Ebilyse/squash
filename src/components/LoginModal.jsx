@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { LogIn, KeyRound, User, Lock, AlertCircle } from "lucide-react";
+import { SquashBallIcon } from "./SquashIcons";
 
 export function LoginModal({
   isOpen,
@@ -53,7 +54,7 @@ export function LoginModal({
           <div className="modal-title-group">
             <div className="login-logo-badge">
               <span className="squash-ball-pulse"></span>
-              <span className="racquet-icon">🎾</span>
+              <SquashBallIcon size={26} />
             </div>
             <div>
               <h2 className="modal-title">Espace Squash Club</h2>

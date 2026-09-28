@@ -45,7 +45,7 @@ export const translations = {
     // Slot Statuses
     status_empty: "Aucun joueur disponible",
     status_single: "1 joueur en attente d'adversaire",
-    status_match_ready: "MATCH POSSIBLE ! 🎾",
+    status_match_ready: "MATCH POSSIBLE ! 🟡",
     status_partial_booked: "1 court réservé • 1 court encore libre !",
     status_fully_booked: "Complet (2/2 courts réservés au club)",
     status_club_closed: "Club fermé",
@@ -208,7 +208,7 @@ export const translations = {
     // Slot Statuses
     status_empty: "No players available",
     status_single: "1 player waiting for an opponent",
-    status_match_ready: "MATCH READY! 🎾",
+    status_match_ready: "MATCH READY! 🟡",
     status_partial_booked: "1 court reserved • 1 court still free!",
     status_fully_booked: "Full (2/2 courts reserved at club)",
     status_club_closed: "Club closed",

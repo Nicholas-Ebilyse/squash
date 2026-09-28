@@ -13,6 +13,7 @@ import {
   Check
 } from "lucide-react";
 import { SlotCard } from "./SlotCard";
+import { SquashBallIcon } from "./SquashIcons";
 import {
   generateDailySlots,
   getHorizonMonths,
@@ -439,7 +440,8 @@ export function CalendarView({
                       <>
                         {matchReadySlotsCount > 0 && (
                           <span className="month-badge-match">
-                            🎾 {matchReadySlotsCount} match{matchReadySlotsCount > 1 ? "s" : ""}
+                            <SquashBallIcon size={12} style={{ display: "inline-block", verticalAlign: "middle", marginRight: "4px" }} />
+                            {matchReadySlotsCount} match{matchReadySlotsCount > 1 ? "s" : ""}
                           </span>
                         )}
                         {bookedSlotsCount > 0 && (

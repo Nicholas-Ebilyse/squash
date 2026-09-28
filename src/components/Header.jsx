@@ -1,5 +1,6 @@
 import React from "react";
 import { Users, Globe, Settings, Calendar, Shield, Sparkles, LogOut, LogIn } from "lucide-react";
+import { SquashBallIcon } from "./SquashIcons";
 
 export function Header({
   currentUser,
@@ -20,7 +21,7 @@ export function Header({
         <div className="brand-group">
           <div className="brand-logo">
             <span className="squash-ball-pulse"></span>
-            <span className="racquet-icon">🎾</span>
+            <SquashBallIcon size={28} />
           </div>
           <div>
             <h1 className="brand-title">

@@ -140,7 +140,7 @@ export function BookingModal({
               <optgroup label="Joueurs disponibles sur ce créneau :">
                 {partnerCandidates.map((p) => (
                   <option key={p.id} value={p.id}>
-                    🎾 {p.displayName} ({t[`level_${p.skillLevel}`] || p.skillLevel})
+                    🟡 {p.displayName} ({t[`level_${p.skillLevel}`] || p.skillLevel})
                   </option>
                 ))}
               </optgroup>
